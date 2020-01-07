@@ -1,0 +1,276 @@
+<template>
+	
+	<view>
+		<scroll-view scroll-x class="bg-white nav fixed" >
+			<view class='flex text-center'>
+				<view class="cu-item flex-sub text-df " @click="navselect(index)" v-for="(nav,index) in navlist" :key="index"
+				 :class="[index == currentIndex ? 'text-red cur' : '']">
+					{{nav}}<uni-badge :text="classNum[index]" v-if="classNum[index]!=0"></uni-badge>
+				</view>
+			</view>
+		</scroll-view>
+		<view style="margin-top: 80rpx;width: 100%;" >
+			
+					
+					<view>
+						<view class="bg-white margin-xs padding-xs shadow radius text-content" :style="{'width':phoneStatus.windowWidth+'px'}"  v-for="(item,index) in order_list"
+						 :key="index">
+						 
+						
+							
+							<view class="flex padding-top-sm solids-top" style="align-items: stretch;" @click="goDetail(item)">
+								<image :src="serverUrl+'/'+m" v-for="m in item.cargoImage" style="flex-shrink: 0;" mode="aspectFill" class="shadow cover radius solids"></image>
+										
+								<view class="flex text-content padding-left justify-between" style="flex-grow: 1;">
+									<view style="">{{ item.goods.name }}</view>
+									<view style="display: flex;flex-direction: column;">
+										
+										<!-- <view class="text-grey text-center">{{item.toAddress.substr(0,6)}}</view>	 -->								
+										<view class="text-grey" style="align-self:flex-end;">重量：    {{item.goods.weight}}</view>
+										<view class="text-grey" style="align-self:flex-end;">体积：    {{item.goods.volume}}</view>
+									</view>
+								</view>
+							</view>
+							<view class="flex justify-end" style="font-size: 24upx;">
+								
+								<view v-if="searchEntity.status==0">
+									
+								
+								<view >
+									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
+									<view class=" round cu-btn lines-orange mid shadow" @click.stop="goDetail(orderdetail)">拒绝</view>
+									<view class=" round cu-btn lines-orange mid shadow" @click.stop="goDetail(orderdetail)">立即同意</view>
+								</view>
+									
+								</view>
+								
+								<view v-if="searchEntity.status==1">
+									
+									<view >
+										<view class="round cu-btn lines-grey mid shadow margin-right-sm" @click.stop="cancel(index)">取消</view>
+									
+									</view>
+									
+								</view>
+								
+								<view v-if="searchEntity.status==2">
+									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
+									
+								</view>
+								
+								<view v-if="searchEntity.status==3">
+									
+									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
+									
+									
+								</view>
+								
+								<view v-if="searchEntity.status==4">
+									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
+									<view >
+									
+										<view class=" round cu-btn lines-orange mid shadow" @click.stop="goDetail(orderdetail)">立即付款</view>
+									</view>
+									
+								</view>
+								
+								<view v-if="searchEntity.status==5">
+									
+								</view>
+								
+								
+								
+								
+							</view>
+						</view>
+					</view>
+		   </view>
+				
+				
+			
+			<view style="margin-bottom: 50upx;" v-if="page.pageTotal!=0">
+				<uni-pagination :total="page.pageTotal" :pageSize="page.pageSize" :current="page.pageNum" @change="paginat">
+				</uni-pagination>
+			</view>
+			<view :style="{'width':phoneStatus.windowWidth+'px','margin-top':phoneStatus.windowHeight/3+'px'}" style="margin-bottom: 50upx;display: flex;justify-content: center;flex-direction: column;align-items: center;align-content: center;" v-if="page.pageTotal==0">
+				<image src="../../static/img/car/noData.png" style="width: 100px; height: 100px; background-color: #eeeeee;" ></image>
+				<view>暂无数据 下拉刷新</view>
+			</view>
+		</view>
+	
+</template>
+
+<script>
+	import { mapState, mapMutations } from 'vuex';
+	import uniPagination from "@/components/uni-pagination/uni-pagination.vue"
+	import http from '../../common/js/request.js';
+	import uniBadge from "@dcloudio/uni-ui/lib/uni-badge/uni-badge.vue"
+
+	export default {
+		computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user']),
+		data() {
+			return {
+				navlist: [
+					'已提交','待同意', '进行中', '待支付','已完成'
+				],
+				currentIndex: 0,
+				pages: 1,
+				dataList:[],
+				page:{
+					pageNum:1,
+					pageSize:10,
+					total:'',
+					pageTotal:'0'
+				},
+				order_list: [
+						
+				
+				],
+				classNum:{
+					'0':'',
+					'1':'',
+					'2':'',
+					'3':'',
+					'4':'',
+					'5':''
+				},
+				searchEntity:{
+					status:1
+				},
+				status: '',	
+				phoneStatus:{}
+			}
+		},
+		components:{uniPagination,uniBadge},
+		methods: {
+			navselect(index){
+				if(index==0){
+					this.searchEntity.status=1;
+				}
+				else if(index==1){
+					this.searchEntity.status=0;
+				}else{
+					this.searchEntity.status=index;
+				}
+				this.currentIndex=index;
+				this.getDataList();
+				
+				
+				
+			},
+			goDetail(v){
+				console.log(v)
+				
+			},
+			paginat(v){
+				
+				this.page.pageNum=v;
+				console.log(v)
+				
+			},
+			goDetail(o){
+				
+				uni.navigateTo({
+					url:'../cargo/cargo/cargo?id='+o.id
+				})
+			},
+			getDataList(){
+				
+				let url='/user/userPoint/findManyWithPage';
+				let data={
+				        pageNum:this.page.pageNum,
+						pageSize:this.page.pageSize,
+						status:this.searchEntity.status,
+						userId:this.user.id
+				    }
+				 let entity={};
+				 entity.url=url;
+				 entity.data=data;
+				 const that=this;
+			     http.get(entity).then(
+			               res => {
+							  
+							  that.page.pageTotal=res.pageCount;
+							  that.order_list=[];
+							  res.list.forEach(p=>{
+								  
+								  p.cargoImage=JSON.parse(p.cargoImage);
+								  that.order_list.push(p)
+								  
+							  });
+			                    
+							  
+			               },
+			               error => {
+			                   console.log('失败');
+			               }
+			           );
+			  	 
+				
+			},
+			getPackageNum(){
+				 let url='/user/query/getPackageNum';
+				 let data={
+						userId:this.user.id
+				    }
+				 let entity={};
+				 entity.url=url;
+				 entity.data=data;
+				 const that=this;
+				 http.get(entity).then(
+				           res => {
+							 let t=res['0'];
+							 res['0']=res['1'];
+							 res['1']=t;
+							 Object.assign(that.classNum,res)
+							 
+							  
+				           },
+				           error => {
+				               console.log('失败');
+				           }
+				       );
+				 
+				
+				
+			}
+			
+
+		},
+		mounted() {
+			const that=this;
+			uni.getSystemInfo({
+			    success: function (res) {
+					that.phoneStatus=res
+					
+					uni.startPullDownRefresh();
+			    }
+			});
+			
+			
+			
+		},
+		onPullDownRefresh() {
+		        const that=this;
+		        setTimeout(function () {
+					
+					that.getPackageNum();
+					that.getDataList()
+					/* that.getPackageNum();
+					that.getDataList() */
+					
+		            uni.stopPullDownRefresh();
+		        }, 1000);
+	   }
+		
+	}
+</script>
+
+<style>
+	@import url("../../static/colorui.css");
+	.cover {
+		width: 150upx;
+		height: 150upx;
+	}
+
+</style>

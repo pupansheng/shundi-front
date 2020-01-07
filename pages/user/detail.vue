@@ -1,0 +1,175 @@
+<template>
+  <view>
+    <cmd-page-body type="top">
+      <cmd-transition name="fade-up">
+        <view>
+          <cmd-cel-item title="头像" slot-right arrow>
+            <cmd-avatar :src="serverUrl+'/'+user.headimage" @click="uploadHeadImage()"></cmd-avatar>
+          </cmd-cel-item>
+          <cmd-cel-item title="级别" :addon="user.level" ></cmd-cel-item>
+          <cmd-cel-item title="昵称" :addon="user.username" ></cmd-cel-item>
+		  <cmd-cel-item title="联系方式":addon="user.phone" ></cmd-cel-item>
+		  
+		  <view v-if="user.usertype==1">
+          <cmd-cel-item title="姓名" :addon="user.realname" ></cmd-cel-item>
+          <cmd-cel-item title="户籍地" :addon="user.nativeplace" ></cmd-cel-item>
+		  <cmd-cel-item title="现居地" :addon="user.nowplace" ></cmd-cel-item>
+         </view>
+		 
+		   <view v-if="user.usertype==2">
+		 <cmd-cel-item title="公司名"   :addon="user.companyname" ></cmd-cel-item>
+		 <cmd-cel-item title="公司地址" :addon="user.companyaddress" ></cmd-cel-item>
+		 <cmd-cel-item title="公司联系人" :addon="user.companylinkname" ></cmd-cel-item>
+		 <cmd-cel-item title="公司联系电话" :addon="user.companylinkphone" ></cmd-cel-item>
+		    </view>
+		 <cmd-cel-item title="修改密码" @click="fnClick('modify')" arrow></cmd-cel-item>
+         
+        </view>
+      </cmd-transition>
+    </cmd-page-body>
+  </view>
+</template>
+
+<script>
+  import { mapState, mapMutations } from 'vuex';
+  import cmdNavBar from "@/components/cmd-nav-bar/cmd-nav-bar.vue"
+  import cmdPageBody from "@/components/cmd-page-body/cmd-page-body.vue"
+  import cmdTransition from "@/components/cmd-transition/cmd-transition.vue"
+  import cmdCelItem from "@/components/cmd-cell-item/cmd-cell-item.vue"
+  import cmdAvatar from "@/components/cmd-avatar/cmd-avatar.vue"
+
+  export default {
+    components: {
+      cmdNavBar,
+      cmdPageBody,
+      cmdTransition,
+      cmdCelItem,
+      cmdAvatar
+    },
+     computed: {
+		...mapState(['hasLogin', 'forcedLogin', 'serverUrl', 'user'])
+	},
+    data() {
+      return {};
+    },
+
+    mounted() {},
+    
+    methods:{
+      /**
+       * 点击触发
+       * @param {Object} type 跳转页面名或者类型方式
+       */
+      fnClick(type){
+        if(type == 'modify'){
+          uni.navigateTo({
+            url:'/pages/pwd/modify'
+          })
+        }
+      },
+	  uploadHeadImage(){
+		  
+		  var that=this;
+		  uni.chooseImage({
+		  	success: res => {
+		  		
+		  		   const tempFilePaths = res.tempFilePaths;
+		  		   const uploadTask = uni.uploadFile({
+		  		               url: that.serverUrl+"/upload", //仅为示例，非真实的接口地址
+		  		               filePath: tempFilePaths[0],
+		  		               name: 'file',
+		  		               formData: {
+		  		                   
+		  		               },
+		  		               success: (uploadFileRes) => {
+		  						   
+		  						  
+		  							var res=JSON.parse(uploadFileRes.data)
+		  						    
+									that.user.headimage=res.url;
+									//更新
+									
+									uni.showLoading({
+									    title: '更新中'
+									});
+									uni.request({
+										url: this.serverUrl + '/user/update/headimage' , //仅为示例，并非真实接口地址。
+										method: 'POST',
+										data: that.user,
+										header: {
+											'content-type': 'application/json'
+											//自定义请求头信息
+										},
+										success: res => {
+											
+											 uni.hideLoading();
+											if (res.data.status) {
+												uni.showToast({
+													title: '更新成功：',
+													image: '../../static/img/alert-2.png',
+													duration: 3000
+												});
+
+											} else {
+												console.log(res.data.message)
+												uni.showToast({
+													title: '更新失败！',
+													image: '../../static/img/alert-3.png',
+													duration: 3000
+												});
+											}
+										},
+										fail: err => {
+											 uni.hideLoading();
+											uni.showToast({
+												title: '更新失败！',
+												image: '../../static/img/alert-3.png',
+												duration: 3000
+											});
+										}
+									});
+									
+									
+									
+		   
+		  		               }
+		  		           });
+		  		   
+		  		   uni.showLoading({
+		  		       title: '上传中'
+		  		   });
+		  		      uploadTask.onProgressUpdate((res) => { 
+		  		             /*  console.log('上传进度' + res.progress);
+		  		               console.log('已经上传的数据长度' + res.totalBytesSent);
+		  		               console.log('预期需要上传的数据总长度' + res.totalBytesExpectedToSend); */
+		  		               if (res.progress ==100) {
+		  		                    uni.hideLoading();
+		  		               } 
+		  		           });
+		  		
+		  	}
+		  })
+		  
+		  
+		  
+		  
+		  
+	  }
+    }
+  }
+</script>
+
+<style>
+  .btn-logout {
+    margin-top: 100upx;
+    width: 80%;
+    border-radius: 50upx;
+    font-size: 16px;
+    color: #fff;
+    background: linear-gradient(to right, #365fff, #36bbff);
+  }
+
+  .btn-logout-hover {
+    background: linear-gradient(to right, #365fdd, #36bbfa);
+  }
+</style>
