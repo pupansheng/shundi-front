@@ -36,38 +36,41 @@
 							
 							<view style="display: flex;justify-content: flex-end;">
 								<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与货主商量</button>
-							    <button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">取消</button>
+							    <button @click.stop="cancel0(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">取消</button>
 							</view>
 								
 							</view>
 							<view v-if="searchEntity.status==1">
 								
-								<view style="display: flex;justify-content: flex-end;">
-									<view class="round cu-btn lines-grey mid shadow margin-right-sm" @click.stop="cancel(index)">取货</view>
-								
+								<view style="display: flex;justify-content: space-around;">
+									 <view style="display: flex;align-items: center;">最终价格：${{item.talkprice}}元</view> 
+									 <view style="display: flex;justify-content: flex-end;">
+										 <view class="round cu-btn lines-grey mid shadow margin-right-sm" @click.stop="butongyi(item)">取消接单</view>
+										 <view class="round cu-btn lines-grey mid shadow margin-right-sm" @click.stop="getCargo(item)">确认取货</view>								   
+									 </view>
+									
 								</view>
 								
 							</view>
 							
 							<view v-if="searchEntity.status==2">
 								<view style="display: flex;justify-content: flex-end;">
-								<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
+								<button  class="round lines-grey cu-btn shadow mid margin-right-sm" @click="cancelRecord(item)">删除记录</button>
 								</view>
 							</view>
 							
 							<view v-if="searchEntity.status==3">
-								<view  style="display: flex;justify-content: flex-end;">
-									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
-									
-								</view>
 								
+							 <view style="display: flex;justify-content: space-between;align-items: center;" >
+							       <view>取货码：{{item.bk1}}</view>
+							 	   <button @click.stop="geikehu(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">已送达</button>
+							 </view>
 								
 							</view>
 							
 							<view v-if="searchEntity.status==4">
 								<view  style="display: flex;justify-content: flex-end;">
-									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
-									
+									 <view style="display: flex;align-items: center;">价格：${{item.talkprice}}元</view> 
 								</view>
 								
 								
@@ -114,7 +117,7 @@
 		data() {
 			return {
 				navlist: [
-					'已申请','待同意', '进行中', '待支付','已完成'
+					'已申请','已同意','被拒绝','进行中', '待支付','已完成'
 				],
 				currentIndex: 0,
 				pages: 1,
@@ -146,6 +149,162 @@
 		},
 		components:{uniPagination,uniBadge},
 		methods: {
+			geikehu(o){
+				
+				const that=this;
+				
+				uni.showModal({
+				    title: '提示',
+					content:'确认操作?',
+				    success: function (res) {
+				        if (res.confirm) {
+				           
+						  let submit={};
+						  submit.url='/order/daohuo';
+						  submit.data=o;
+						  	
+						  http.post(submit).then(res=>{
+						  	that.getOderNum();
+						  	that.getDataList();
+						  },error=>{
+						  	
+						  	
+						  })
+						   
+				        } else if (res.cancel) {
+				          
+						 
+				        }
+				    }
+				});
+				
+				
+			},
+			butongyi(o){
+				
+				const that=this;
+				
+				uni.showModal({
+				    title: '提示',
+					content:'确认取消?',
+				    success: function (res) {
+				        if (res.confirm) {
+				           
+						  let submit={};
+						  submit.url='/order/reject';
+						  submit.data=o;
+						  	
+						  http.post(submit).then(res=>{
+						  	that.getOderNum();
+						  	that.getDataList();
+						  },error=>{
+						  	
+						  	
+						  })
+						   
+				        } else if (res.cancel) {
+				          
+						 
+				        }
+				    }
+				});
+				
+				
+			},
+			getCargo(item){
+				
+				const that=this;
+				
+				uni.showModal({
+				    title: '提示',
+					content:'确认取货? 请注意,当确认时无法更改，直到订单完成',
+				    success: function (res) {
+				        if (res.confirm) {
+				           
+						  let submit={};
+						  submit.url='/order/confirm';
+						  submit.data=item;
+						  	
+						  http.post(submit).then(res=>{
+							uni.showToast({
+								icon:'success',
+								title:'成功!取货码：'+res
+							})  
+							console.log(res)
+						  	that.getOderNum();
+						  	that.getDataList();
+						  },error=>{
+						  	
+							
+						  	
+						  })
+						   
+				        } else if (res.cancel) {
+				          
+						 
+				        }
+				    }
+				});
+				
+				
+			},
+			cancel0(o){
+				const that=this;
+				
+				uni.showModal({
+				    title: '提示',
+					content:'确认?',
+				    success: function (res) {
+				        if (res.confirm) {
+				           
+						  let submit={};
+						  submit.url='/order/delete';
+						  submit.data={
+						  	id:o.id,
+							status:o.status,
+							userpointid:o.userpointid
+						  };
+						  http.post(submit).then(res=>{
+						  	that.getOderNum();
+						  	that.getDataList();
+						  },error=>{
+						  	
+						  	
+						  })
+						   
+				        } else if (res.cancel) {
+				          
+						 
+				        }
+				    }
+				});
+				
+				
+				
+				
+				
+			},
+			cancelRecord(o){
+				const that=this;
+				let submit={};
+				submit.url='/order/delete';
+				submit.data={
+					id:o.id,
+					status:o.status,
+					userpointid:o.userpointid
+				};
+				http.post(submit).then(res=>{
+					
+					that.getOderNum();
+					that.getDataList();
+					
+				},error=>{
+					
+					
+				})
+				
+				
+			},
 			navselect(index){
 
 				this.searchEntity.status=index;

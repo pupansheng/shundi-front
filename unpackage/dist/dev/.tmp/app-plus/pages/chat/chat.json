@@ -1,7 +1,4 @@
 {
   "navigationBarTitleText": "信息",
-  "usingComponents": {
-    "chat-input": "/components/chatinput",
-    "message-show": "/components/messageshow"
-  }
+  "usingComponents": {}
 }

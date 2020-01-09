@@ -27,6 +27,10 @@ import cmdPageBody from '@/components/cmd-page-body/cmd-page-body.vue';
 import cmdTransition from '@/components/cmd-transition/cmd-transition.vue';
 import cmdInput from '@/components/cmd-input/cmd-input.vue';
 import { mapState } from 'vuex';
+import http from '../../common/js/request.js';
+
+
+
 export default {
 	components: {
 		cmdNavBar,
@@ -163,7 +167,38 @@ export default {
 			    title: "正在发送验证码",
 			    icon: "loading",
 			    success: () => {
-			      // 成功后显示倒计时60s后可在点击
+					
+					let submit={};
+					submit.url='/message/getYanzhengma/' + this.mobile.phone + '/update';
+					http.get(submit).then(res=>{			   
+										   uni.showToast({
+										       icon: 'none',
+										       title: '发送成功'
+										   });		
+										   // 成功后显示倒计时60s后可在点击
+										   this.safety.state = true; 
+										   
+										     // 倒计时
+										     this.safety.interval = setInterval(() => {
+										       if (this.safety.time-- <= 0) {
+										         this.safety.time = 60;
+										         this.safety.state = false;
+										         clearInterval(this.safety.interval);
+										       }
+										     }, 1000);
+										     
+														  
+					},error=>{
+										   uni.showToast({
+										       icon: 'none',
+										       title: '发送失败:'+error
+										   });	   
+					});
+					
+					
+					
+					
+			 /*     // 成功后显示倒计时60s后可在点击
 			      this.safety.state = true;
 			      // 倒计时
 			      this.safety.interval = setInterval(() => {
@@ -192,7 +227,7 @@ export default {
 				  			icon: 'none'
 				  		});
 				  	}
-				  });		  
+				  }); */		  
 			    }
 			  })
 			} else {

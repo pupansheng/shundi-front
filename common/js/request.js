@@ -42,11 +42,22 @@ var http={
 						resolve(res.data.data);
 					 }
 					 else{
+						 if(res.data){
 						 uni.showToast({
 						 	icon: 'none',
 						 	title: '业务请求失败:'+res.data.message
 						 });				 
 						 reject(res.data.message);
+						 }else{
+							
+							uni.showToast({
+								icon: 'none',
+								title: '网络请求失败'
+							});				 
+							reject(res); 
+							 
+						 }
+						 
 					 }				 
 				 }
 				},
@@ -106,11 +117,21 @@ var http={
    						
    					 }
    					 else{
-   						 uni.showToast({
-   						 	icon: 'none',
-   						 	title: '业务请求失败:'+res.data.message
-   						 });
-						reject(res.data.message);
+   						if(res.data){
+   						uni.showToast({
+   							icon: 'none',
+   							title: '业务请求失败:'+res.data.message
+   						});				 
+   						reject(res.data.message);
+   						}else{
+   													
+   						uni.showToast({
+   						icon: 'none',
+   						title: '网络请求失败'
+   						});				 
+   						reject(res); 
+   													 
+   						}
    					 }				 
    				 }
    				},
@@ -156,20 +177,32 @@ var http={
    					 	icon: 'none',
    					 	title: '请求失败:权限不足!'
    					 });
+					 reject(res); 	
    					 }
    					 if(res.data.code==900){
    					 uni.showToast({
    					 	icon: 'none',
    					 	title: '业务请求失败:'+res.data.message
    					 });
+					 reject(res); 	
    					 } 
    				 }else{
-   					
-   						
-   						resolve(res.data.data);
-   						
-   					
-   							 
+   						if(res.data){
+							
+							resolve(res);	
+							
+						}else{
+							
+							
+							
+						uni.showToast({
+							icon: 'none',
+							title: '网络请求失败'
+						});		
+						
+								 
+						reject(res); 	
+						}
    				 }
    				},
    			    fail: err => {
@@ -221,13 +254,16 @@ var http={
    					 	title: '业务请求失败:'+res.data.message
    					 });
    					 } 
-   				 }else{
-   					
-   						
-   						resolve(res.data.data);
-   						
-   					
-   							 
+   				 }else{				
+   					if(res.data){
+   						resolve(res);
+   					}else{
+   					uni.showToast({
+   						icon: 'none',
+   						title: '网络请求失败'
+   					});				 
+   					reject(res); 			
+   					}		 
    				 }
    				},
    			    fail: err => {

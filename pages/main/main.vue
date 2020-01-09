@@ -2,7 +2,7 @@
 	<view class="content">
 		<view class="page-body">
 			<view class="page-section page-section-gap">
-				<map :style="{ width: '100%', height: wH + 'px' }" @markertap="markClick" :latitude="latitude" :longitude="longitude" :circles="circles" :markers="covers"></map>
+				<map :style="{ width: '100%', height: wH-8 + 'px' }" @markertap="markClick" :latitude="latitude" :longitude="longitude" :circles="circles" :markers="covers"></map>
 		     	
 			</view>
 			
@@ -18,11 +18,10 @@
 				<view>
 					<swiper :current="TabCur" duration="300" @change="swiperChange">
 						<swiper-item v-for="(item, index) in carList" :key="index">
-							<view style="display: flex;align-items: flex-start;">
+							<view style="display: flex;align-items: flex-start;margin-right: 3rpx;">
 								<view>
 							      <image style="width:450rpx;height: 260rpx ;margin-top: 0rpx;padding-top: 0rpx; background-color: #eeeeee;" :src="item.url" mode="aspectFit"></image>
 								</view>
-			
 								<view>
 									<!-- <p>车型：{{ item.name }}</p>
 									<p>起步价：${{ item.startPrice }}RMB</p>
@@ -40,45 +39,56 @@
 			<view v-show="step[1]">
 				<scroll-view :scroll-top="wH" scroll-y="true" class="scroll-Y" v-if="TabCur==0">
 					<view class="uni-form-item uni-column">
-						<view class="title" style="color: red;">*货物名称</view>
+						<view class="title" >货物名称</view>
 						<input class="uni-input" placeholder="货物名称" v-model="userPoint.goods.name" />
 					</view>
-					<view class="uni-form-item uni-column">
-						<view class="title" style="color: red;">*货物体积</view>
+				<!-- 	<view class="uni-form-item uni-column">
+					<view class="title" ><span style="color: red;">*</span>货物体积</view>
 						<input class="uni-input" placeholder="货物体积" v-model="userPoint.goods.volume" />
 					</view>
 					<view class="uni-form-item uni-column">
-						<view class="title" style="color: red;">*货物质量</view>
+						<view class="title" ><span style="color: red;">*</span>货物重量</view>
 						<input class="uni-input" placeholder="货物质量" v-model="userPoint.goods.weight" />
 					</view>
+					 -->
+					<view style="display: flex;align-items: center;justify-content: space-around;">
+						
+						<view>&nbsp;</view><view  class="title">体积:</view><uni-number-box step="0.1" @change="bindChange1"></uni-number-box>升&nbsp;<view style="border:solid #007AFF;width: 3rpx;height: 9rpx;"></view>
+						<view  class="title">重量:</view><uni-number-box step="0.1" @change="bindChange2"></uni-number-box>kg
+					</view>
+					
                      
                        <view class="uni-form-item uni-column">
-                       	<view class="title" style="color: red;">货物图片</view>
-                        <QSPics :name="name" variableName="pics"  :exists="false" title="物品图片"  :typeName="'cargoImage'" @upload="uploadImage" v-model="cargoImage"></QSPics>
+                       <view class="title" >货物图片</view>
+                        <QSPics :name="name" variableName="pics"  :exists="false" title="上传图片"  :typeName="'cargoImage'" @upload="uploadImage" v-model="cargoImage"></QSPics>
                    	
                        </view>
 					<view class="uni-form-item uni-column">
-						<view class="title" style="color: #09BB07;">货物描述</view>
+						<view class="title" >货物描述</view>
 						<textarea class="uni-input" style="height: 100rpx;" placeholder="货物描述" v-model="userPoint.goods.detail" />
 					</view>
 					<hr/>
-					<view class="uni-form-item uni-column">
+					<!-- <view class="uni-form-item uni-column">
 						<view class="title" style="color: red;">*收货人</view>
 						<input class="uni-input" placeholder="收货人" v-model="userPoint.consignee.name" />
 					</view>
 					<view class="uni-form-item uni-column">
 						<view class="title" style="color: red;">*收货人电话</view>
 						<input class="uni-input" placeholder="收货人电话" v-model="userPoint.consignee.phone" />
+					</view> -->
+					<view style="display: flex;align-items: center;">
+						<view>&nbsp;&nbsp;</view><view  class="title"><uni-icons type="person" size="20" />收货人</view><input class="uni-input" placeholder="收货人" v-model="userPoint.consignee.name" />
+						<view  class="title"><uni-icons type="phone" size="20" />联系电话</view><input class="uni-input" placeholder="收货人电话" v-model="userPoint.consignee.phone" />
 					</view>
-					<view class="uni-form-item uni-column">
-						<view class="title" style="color: red;">*放货地址</view>
+					<view class="uni-form-item uni-column" style="margin-top: 1rpx;padding-top: 2rpx;">
+						<view class="title"><uni-icons type="location" size="20" />放货地址</view>
 						<input class="uni-input" placeholder="收货地址" v-model="userPoint.address" @click="searAddress(1)"/>
 						<!-- <ul>
 							<li v-for="(v,k) in addressList1" @click="addressSelect(v,k,1)">{{v.name}}</li>
 						</ul> -->						
 					</view>
 					<view class="uni-form-item uni-column">
-						<view class="title" style="color: red;">*收货地址</view>
+						<view class="title"><uni-icons type="location" size="20" />收货地址</view>
 						<input class="uni-input" placeholder="收货地址" v-model="userPoint.toaddress"  @click="searAddress(2)" />
 						<!-- <ul>
 							<li v-for="(v,k) in addressList2" @click="addressSelect(v,k,2)">{{v.name}}</li>
@@ -95,7 +105,8 @@
 					 <view class="title">输入目的地：</view>
 					 <input  class="uni-input"  placeholder="目的地 由此检索出与你相同路线的包裹" v-model="tempEntity.address" @click="chooseToAddress()" />
 				</view>
-				 <view style="display: flex;justify-content: center;">
+				 <view style="display: flex;justify-content: space-around;">
+				<button type="primary" style="align-self: flex-end;" size="mini" v-show="TabCur==1" @click="preStep()">返回</button>
 				<button type="primary" style="align-self: flex-end;" size="mini" v-show="TabCur==1" @click="searchCargo()"><icon type="search" size="10" />点击搜索附近📦</button>
 				</view>
 					
@@ -152,6 +163,8 @@ import uniList from "@dcloudio/uni-ui/lib/uni-list/uni-list.vue"
 import uniListItem from "@dcloudio/uni-ui/lib/uni-list-item/uni-list-item.vue"
 import uniDrawer from '@dcloudio/uni-ui/lib/uni-drawer/uni-drawer.vue'
 import QSPics from '@/components/QS-inputs-split/elements/QS-pics/index.vue';
+import uniIcons from "@dcloudio/uni-ui/lib/uni-icons/uni-icons.vue"
+import uniNumberBox from "@dcloudio/uni-ui/lib/uni-number-box/uni-number-box.vue"
 
 export default {
 	computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user']),
@@ -163,7 +176,9 @@ export default {
 		uniList,
 		uniListItem,
 		uniDrawer,
-		 QSPics
+		 QSPics,
+		 uniIcons,
+		 uniNumberBox 
 	},
 	data() {
 		return {
@@ -256,6 +271,15 @@ export default {
 	},
 	methods: {
 		...mapMutations(['login', 'updateUser']),
+		bindChange1(v){
+			
+			this.userPoint.goods.volume=v
+			
+		},
+		bindChange2(v){
+			
+			this.userPoint.goods.weight=v;
+		},
 		chooseToAddress(){
 			let that=this;
 			uni.chooseLocation({
@@ -623,7 +647,7 @@ export default {
 					   	    fail: err => {
 					   		uni.showToast({
 					   			icon: 'none',
-					   			title: '请求失败'
+					   			title: '网络请求失败:'+err
 					   		});
 					   	}
 					   });
@@ -656,7 +680,7 @@ export default {
 				
 				uni.showToast({
 					icon: 'none',
-					title: '请填写必输字段(有*)'
+					title: '请填写货物名'
 				});
 				return false;
 			}
@@ -664,7 +688,7 @@ export default {
 				
 				uni.showToast({
 					icon: 'none',
-					title: '请填写必输字段(有*)'
+					title: '请填写货物重量'
 				});
 				return false;
 			}
@@ -672,7 +696,7 @@ export default {
 				
 				uni.showToast({
 					icon: 'none',
-					title: '请填写必输字段(有*)'
+					title: '请填写货物体积'
 				});
 				return false;
 			}
@@ -680,7 +704,7 @@ export default {
 				
 				uni.showToast({
 					icon: 'none',
-					title: '请填写必输字段(有*)'
+					title: '请填写收货人姓名'
 				});
 				return false;
 			}
@@ -688,7 +712,7 @@ export default {
 				
 				uni.showToast({
 					icon: 'none',
-					title: '请填写必输字段(有*)'
+					title: '请填写收货人联系电话'
 				});
 				return false;
 			}
@@ -696,7 +720,7 @@ export default {
 				
 				uni.showToast({
 					icon: 'none',
-					title: '请填写必输字段(有*)'
+					title: '请填写目的地址'
 				});
 				return false;
 			}
@@ -704,7 +728,7 @@ export default {
 				
 				uni.showToast({
 					icon: 'none',
-					title: '请填写必输字段(有*)'
+					title: '请填写寄件地址'
 				});
 				return false;
 			}
@@ -739,7 +763,13 @@ export default {
 								this.login(seser.username);
 								that.updateUser(seser);
 							} else {
-								this.toLogin();
+								uni.showToast({
+									icon: 'none',
+									title: '登陆已过期，请重新登录'
+								});
+								setTimeout(function(){
+									that.toLogin();
+								},1000)
 							}
 						},
 						fail: err => {
@@ -747,15 +777,34 @@ export default {
 								icon: 'none',
 								title: '自动登录失败'
 							});
-
-							this.toLogin();
+                            setTimeout(function(){
+								that.toLogin();
+							},1000)
+							
 						}
 					});
 				} else {
-					this.toLogin();
+					
+					uni.showToast({
+						icon: 'none',
+						title: '自动登录失败'
+					});
+					setTimeout(function(){			
+						that.toLogin();
+					},1000)
 				}
 			} catch (e) {
-				this.toLogin();
+				
+				
+				uni.showToast({
+					icon: 'none',
+					title: '请先登录'
+				});
+				setTimeout(function(){
+					
+					that.toLogin();
+					
+				},1000)
 			}
 		}
 	},
@@ -803,6 +852,7 @@ export default {
 </script>
 
 <style scoped>
+@import '../../common/uni/uni.css';
 .hello {
 	display: flex;
 	flex: 1;
@@ -811,7 +861,7 @@ export default {
 
 .title {
 	color: #8f8f94;
-	margin-top: 50upx;
+	margin-top: 10upx;
 }
 
 .ul {
@@ -871,6 +921,7 @@ export default {
 	display: flex;
 	width: 100%;
 	flex-direction: column;
+	margin-right: 3rpx;
 }
 .btn {
 }

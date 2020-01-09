@@ -215,7 +215,7 @@ form {
 	display: -webkit-flex;
 	display: flex;
 	width: 100%;
-	padding: 10rpx 0;
+	padding: 1rpx 0;
 }
 .uni-form-item .title {
 	padding: 10rpx 25rpx;

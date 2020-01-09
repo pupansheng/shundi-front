@@ -67,7 +67,7 @@
 					</view>
 			    </view>
 			</uni-drawer>
-			<view style="display: flex;justify-content: center;">
+			<view style="display: flex;justify-content: center;" v-if="entity.id!=null">
 				<button type="primary" plain="true"  @click="fnOrder()" v-if="isShow"><uni-icons type="plus" size="30"/>我要接这单</button>
 				<button type="primary"><uni-icons type="chat" size="30"/>私聊货主</button>
 			</view>
@@ -82,6 +82,7 @@ import uniIcons from "@dcloudio/uni-ui/lib/uni-icons/uni-icons.vue"
 import uniDrawer from '@dcloudio/uni-ui/lib/uni-drawer/uni-drawer.vue'
 import cmdCelItem from "@/components/cmd-cell-item/cmd-cell-item.vue"
 import cmdAvatar from "@/components/cmd-avatar/cmd-avatar.vue"
+import http from '../../../common/js/request.js';
 export default {
 	computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user']),
 	components:{
@@ -154,9 +155,6 @@ export default {
 		        },
 		 fnOrder(){
 			 const that=this;
-			 uni.showLoading({
-			 	title:'提交中..'
-			 })
 			 let en={};
 			 en.userid=that.user.id;
 			 en.userpointid=that.entity.id;
@@ -166,7 +164,41 @@ export default {
 			 en.goodsweight=that.entity.goods.weight;
 			 en.goodsvolume=that.entity.goods.volume;
 			 en.goodsstatus=that.entity.status;
+			 let submit={
+				 data:en,
+				 url:'/order/add'
+			 };
+			 
+			 http.post(submit).then(res=>{
+				 
+				 uni.showToast({
+				 icon: 'none',
+				 title: '接单成功 请刷新页面',
+				 })
+				 setTimeout(function() {
+				  
+				   uni.navigateBack({
+				   delta:1
+				    })
+				 									 
+				 }, 1500);
+				 
+				 
+				 
+			 },err=>{
+				 
+				 setTimeout(function() {
+				 									 
+				  uni.hideLoading();
+				  uni.navigateBack({
+				  delta:1
+				   })
+				 									 
+				 }, 1500);
+				 
+			 })
 			
+			/* 
 			 uni.request({
 			 		   	url: that.serverUrl + '/order/add', //仅为示例，并非真实接口地址。
 			 		   	method: 'POST',
@@ -182,7 +214,7 @@ export default {
 											 
 								uni.showToast({
 								icon: 'none',
-								title: '请求成功',
+								title: '接单成功 请刷新页面',
 								
 								complete() {
 									
@@ -205,7 +237,7 @@ export default {
 								
 								uni.showToast({
 									icon: 'none',
-									title: '请求失败',
+									title: '请求失败：'+res.data.message,
 									complete() {
 										
 									
@@ -237,7 +269,9 @@ export default {
 			 		   		uni.hideLoading();
 			 
 			 		   	}
-			 		   });
+			 		   }); */
+					   
+					   
 			 
 			 
 			 
@@ -248,7 +282,45 @@ export default {
 	onLoad: function (option) { //option为object类型，会序列化上个页面传递的参数
 	       const that=this
 		   that.isShow=true;
-	       uni.showLoading({
+		   let carId=option.id;
+		   let submit={};
+		   submit.url='/user/userPoint/findOne/'+carId;
+		   submit.data={};
+		   http.post(submit).then(res=>{
+			   
+			   that.entity=res
+			   if(res.status==0){
+				   
+			   	uni.showToast({
+			   		icon:'none',
+			   		title:'该包裹已被其他用户接单，暂时无法接单'
+			   	})
+				
+			   	that.isShow=false;
+			   }
+			   let a=JSON.parse(res.cargoImage);
+			   a.forEach(p=>{
+			   	let h={colorClass: 'uni-bg-red',url:that.serverUrl+'/'+p,content: '物品详情'}
+			   	that.imageArray.push(h)
+			   })
+			  
+			   
+		   },err=>{
+			   
+			  
+			   setTimeout(function() {
+			   									 
+			    uni.hideLoading();
+			    uni.navigateBack({
+			    delta:1
+			     })
+			   									 
+			   }, 1500);
+			   
+		   })
+		   
+		   
+	     /*  uni.showLoading({
 	       	title:'获取该物品详细中...'
 	       })
 		   let carId=option.id;
@@ -289,7 +361,7 @@ export default {
 
 		   	}
 		   });
-
+ */
 
 
 	 }

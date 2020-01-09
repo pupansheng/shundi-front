@@ -9,6 +9,47 @@
 				</view>
 			</view>
 		</scroll-view>
+		<uni-drawer :visible="drawer" @close="drawer=false">
+		    <view style="margin-top: 100rpx;">
+		        <view class="title1">
+					接单人详细信息
+				</view>
+				
+				<view >
+					
+					<view>
+					  <cmd-cel-item title="头像"  slot-right >
+					    <cmd-avatar :src="serverUrl+'/'+orderPeople.headimage"></cmd-avatar>
+					  </cmd-cel-item>
+					  <cmd-cel-item title="级别" :addon="orderPeople.level" ></cmd-cel-item>
+					  <cmd-cel-item title="昵称" :addon="orderPeople.username" ></cmd-cel-item>
+					  <cmd-cel-item title="联系方式":addon="orderPeople.phone" ></cmd-cel-item>
+					  
+					  <view v-if="orderPeople.usertype==1">
+					  <cmd-cel-item title="姓名" :addon="orderPeople.realname" ></cmd-cel-item>
+					  <cmd-cel-item title="户籍地" :addon="orderPeople.nativeplace" ></cmd-cel-item>
+					  <cmd-cel-item title="现居地" :addon="orderPeople.nowplace" ></cmd-cel-item>
+					 </view>
+					 
+					   <view v-if="orderPeople.usertype==2">
+					 <cmd-cel-item title="公司名"   :addon="orderPeople.companyname" ></cmd-cel-item>
+					 <cmd-cel-item title="公司地址" :addon="orderPeople.companyaddress" ></cmd-cel-item>
+					 <cmd-cel-item title="公司联系人" :addon="orderPeople.companylinkname" ></cmd-cel-item>
+					 <cmd-cel-item title="公司联系电话" :addon="orderPeople.companylinkphone" ></cmd-cel-item>
+					    </view>
+						<cmd-cel-item title="与接单人商量" @click="talkTo()"  slot-right arrow>
+						 
+						</cmd-cel-item>
+					
+					 
+					</view>
+					
+					
+					
+				</view>
+		    </view>
+		</uni-drawer>
+		<hFormAlert v-if="cancelShow" title="提示" name="price" placeholder="请输入最终价格,请谨慎(单位 元)" @confirm="fnAgreen" @cancel="cancelShow=false"></hFormAlert>
 		<view style="margin-top: 80rpx;width: 100%;" >
 			
 					
@@ -37,9 +78,10 @@
 									
 								
 								<view >
-									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
-									<view class=" round cu-btn lines-orange mid shadow" @click.stop="goDetail(orderdetail)">拒绝</view>
-									<view class=" round cu-btn lines-orange mid shadow" @click.stop="goDetail(orderdetail)">立即同意</view>
+									
+									<button @click.stop="seeOrderPeople(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">查看接单人</button>
+									<view class=" round cu-btn lines-orange mid shadow" @click.stop="jujue(item)">拒绝</view>
+									<view class=" round cu-btn lines-orange mid shadow" @click.stop="tongyi(item)">立即同意</view>
 								</view>
 									
 								</view>
@@ -47,7 +89,7 @@
 								<view v-if="searchEntity.status==1">
 									
 									<view >
-										<view class="round cu-btn lines-grey mid shadow margin-right-sm" @click.stop="cancel(index)">取消</view>
+										<view class="round cu-btn lines-grey mid shadow margin-right-sm" @click="cancel(item)">取消</view>
 									
 									</view>
 									
@@ -60,24 +102,35 @@
 								
 								<view v-if="searchEntity.status==3">
 									
-									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
+									
+									<button @click.stop="fnSetStatus1(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">重新找接货人</button>
 									
 									
 								</view>
 								
 								<view v-if="searchEntity.status==4">
-									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
-									<view >
 									
-										<view class=" round cu-btn lines-orange mid shadow" @click.stop="goDetail(orderdetail)">立即付款</view>
+									
+									<view style="display: flex;justify-content: flex-end;align-items: center;" >
+									  <button @click.stop="seeCargoCode(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">查看取货码</button>
+									  <button @click.stop="fnQuerenshouhuo(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">确认收货</button>								
 									</view>
+																	
 									
 								</view>
 								
 								<view v-if="searchEntity.status==5">
 									
+									<view style="display: flex;justify-content: flex-end;align-items: center;" >
+								
+									  <button @click.stop="pay(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">支付</button>								
+									</view>
 								</view>
 								
+								<view v-if="searchEntity.status==6">
+									
+								
+								</view>
 								
 								
 								
@@ -96,6 +149,7 @@
 				<image src="../../static/img/car/noData.png" style="width: 100px; height: 100px; background-color: #eeeeee;" ></image>
 				<view>暂无数据 下拉刷新</view>
 			</view>
+			<uni-popup ref="popup" type="center">{{code}}</uni-popup>
 		</view>
 	
 </template>
@@ -105,13 +159,18 @@
 	import uniPagination from "@/components/uni-pagination/uni-pagination.vue"
 	import http from '../../common/js/request.js';
 	import uniBadge from "@dcloudio/uni-ui/lib/uni-badge/uni-badge.vue"
+	import uniDrawer from '@dcloudio/uni-ui/lib/uni-drawer/uni-drawer.vue'
+	import cmdCelItem from "@/components/cmd-cell-item/cmd-cell-item.vue"
+	import cmdAvatar from "@/components/cmd-avatar/cmd-avatar.vue"
+	import hFormAlert from '@/components/h-form-alert/h-form-alert.vue';
+	import uniPopup from "@dcloudio/uni-ui/lib/uni-popup/uni-popup.vue"
 
 	export default {
 		computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user']),
 		data() {
 			return {
 				navlist: [
-					'已提交','待同意', '进行中', '待支付','已完成'
+					'已提交','待同意','待回复','被拒绝', '进行中','待支付','已完成'
 				],
 				currentIndex: 0,
 				pages: 1,
@@ -126,23 +185,266 @@
 						
 				
 				],
+				code:'',
+				cancelShow:false,
 				classNum:{
 					'0':'',
 					'1':'',
 					'2':'',
 					'3':'',
 					'4':'',
-					'5':''
+					'5':'',
+					'6':''
 				},
 				searchEntity:{
 					status:1
 				},
+				entity:{},
 				status: '',	
-				phoneStatus:{}
+				phoneStatus:{},
+				orderPeople:{},
+				drawer:false
 			}
 		},
-		components:{uniPagination,uniBadge},
+		components:{uniPagination,uniBadge,uniDrawer,cmdCelItem,
+		cmdAvatar,hFormAlert,uniPopup},
 		methods: {
+			pay(o){
+				
+				
+			},
+			fnQuerenshouhuo(o){
+				
+				const that=this;
+				let submit={};
+				submit.url='/user/userPoint/querenshouhuo';
+				submit.data=o;
+				http.post(submit).then(res=>{
+				
+					that.getPackageNum();
+					that.getDataList()		
+					
+					
+					
+				},error=>{
+					
+											
+					
+				})
+				
+				
+				
+			},
+			seeCargoCode(o){
+				
+				
+				const that=this;
+				let submit={};
+				submit.url='/user/userPoint/getCode';
+				submit.data=o;
+				http.post(submit).then(res=>{
+				
+					that.code=res.bk1;
+					that.$refs.popup.open()
+					
+					
+				},error=>{
+					
+											
+					
+				})
+				
+				
+			},
+			fnSetStatus1(o){
+				const that=this;
+				let submit={};
+				submit.url='/user/userPoint/updateStatus/reset';
+				submit.data=o;
+				http.post(submit).then(res=>{
+					
+					that.getPackageNum();
+					that.getDataList()		
+					
+				},error=>{
+					
+											
+					
+				})
+				
+				
+				
+			},
+			talkTo(){
+				
+				console.log("jiaotan")
+				
+				
+			},
+			seeOrderPeople(o){
+				const that=this;
+				that.drawer=true;
+				http.get({url:'/user/userPoint/getBasicInfo/'+o.id}).then(res=>{
+//					console.log(res)
+					that.orderPeople=res;
+					
+					
+				},err=>{
+					
+				})
+				
+				
+			},
+			fnAgreen(v){
+				
+				let reg = /^\d+$|^\d*\.\d+$/g;
+				if(reg.test(v.price)){
+					
+					
+					    const that=this;
+						this.entity.money=v.price;
+						let submit={};
+						submit.url='/user/userPoint/updateStatus/agree'
+							submit.data=that.entity;
+							http.post(submit).then(res=>{				
+							that.getPackageNum();
+							that.getDataList()	
+							that.cancelShow=false;			
+							},err=>{
+												
+							that.cancelShow=false;					
+						})
+						
+						/* uni.showModal({
+						    title: '提示',
+							content:'确认',
+						    success: function (res) {
+						        if (res.confirm) {
+						           
+								    let submit={};
+								    submit.url='/user/userPoint/updateStatus/agree'
+								   	submit.data=that.entity;
+								   	http.post(submit).then(res=>{				
+								   	that.getPackageNum();
+								   	that.getDataList()	
+									that.cancelShow=false;			
+								   	},err=>{
+								   						
+								   	that.cancelShow=false;					
+								   })
+								   
+						        } else if (res.cancel) {
+						          
+								 that.cancelShow=false;		
+						        }
+						    }
+					
+					
+					
+				}) */
+				}else{
+					uni.showToast({
+						title:'只能输入数字和小数点',
+						icon:'none'
+					})
+					v.price=';'
+					
+				}
+				
+			},
+			tongyi(o){
+				this.cancelShow=true;
+				this.entity=o;
+			/* 	const that=this;
+				console.log(o)
+				uni.showModal({
+				    title: '提示',
+					content:'确认同意',
+				    success: function (res) {
+				        if (res.confirm) {
+				           
+						    let submit={};
+						    submit.url='/user/userPoint/updateStatus/agree'
+						   	submit.data=o;
+						   	http.post(submit).then(res=>{				
+						   	that.getPackageNum();
+						   	that.getDataList()						
+						   	},err=>{
+						   						
+						   						
+						   })
+						   
+				        } else if (res.cancel) {
+				          
+						 
+				        }
+				    }
+				}); */
+				
+				
+			},
+			jujue(o){
+				
+				const that=this;
+				console.log(o)
+				uni.showModal({
+				    title: '提示',
+					content:'确认拒绝',
+				    success: function (res) {
+				        if (res.confirm) {
+				           
+						    let submit={};
+						    submit.url='/user/userPoint/updateStatus/reject'
+						   	submit.data=o;
+						   	http.post(submit).then(res=>{				
+						   	that.getPackageNum();
+						   	that.getDataList()						
+						   	},err=>{
+						   						
+						   						
+						   })
+						   
+				        } else if (res.cancel) {
+				          
+						 
+				        }
+				    }
+				});
+				
+				
+				
+			},
+			cancel(o){
+				const that=this;
+				console.log(o)
+				uni.showModal({
+				    title: '提示',
+					content:'确认取消这个订单吗',
+				    success: function (res) {
+				        if (res.confirm) {
+				           
+						    let submit={};
+						    submit.url='/user/userPoint/updateStatus/cancel'
+						    submit.data=o; 
+						   	http.post(submit).then(res=>{				
+						   	that.getPackageNum();
+						   	that.getDataList()						
+						   	},err=>{
+						   						
+						   						
+						   })
+						   
+				        } else if (res.cancel) {
+				          
+						 
+				        }
+				    }
+				});
+				
+				
+			
+				  
+			},
 			navselect(index){
 				if(index==0){
 					this.searchEntity.status=1;
@@ -189,7 +491,7 @@
 				 const that=this;
 			     http.get(entity).then(
 			               res => {
-							  
+							
 							  that.page.pageTotal=res.pageCount;
 							  that.order_list=[];
 							  res.list.forEach(p=>{
@@ -209,7 +511,7 @@
 				
 			},
 			getPackageNum(){
-				 let url='/user/query/getPackageNum';
+				 let url='/user/userPoint/query/getPackageNum';
 				 let data={
 						userId:this.user.id
 				    }
@@ -227,7 +529,9 @@
 							  
 				           },
 				           error => {
-				               console.log('失败');
+							   
+				               console.log('失败：'+error);
+							   
 				           }
 				       );
 				 
@@ -266,11 +570,19 @@
 	}
 </script>
 
+<style  lang="scss">
+	
+	@import '../../common/common.scss';
+	.title1{
+		@include title
+	}
+	
+
+</style>
 <style>
 	@import url("../../static/colorui.css");
 	.cover {
 		width: 150upx;
 		height: 150upx;
 	}
-
 </style>

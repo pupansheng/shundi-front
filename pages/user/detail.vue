@@ -1,12 +1,13 @@
 <template>
-  <view>
-    <cmd-page-body type="top">
-      <cmd-transition name="fade-up">
+  <view style="margin-top: 0rpx;">
+    <cmd-page-body type="top" style="margin-top: 0rpx;">
+      <cmd-transition name="fade-up" style="margin-top: 0rpx;">
         <view>
           <cmd-cel-item title="头像" slot-right arrow>
             <cmd-avatar :src="serverUrl+'/'+user.headimage" @click="uploadHeadImage()"></cmd-avatar>
           </cmd-cel-item>
-          <cmd-cel-item title="级别" :addon="user.level" ></cmd-cel-item>
+          <cmd-cel-item title="级别" :addon="user.lerver" ></cmd-cel-item>
+		  <cmd-cel-item title="余额" :addon="'￥'+user.money?user.money:0" ></cmd-cel-item>
           <cmd-cel-item title="昵称" :addon="user.username" ></cmd-cel-item>
 		  <cmd-cel-item title="联系方式":addon="user.phone" ></cmd-cel-item>
 		  

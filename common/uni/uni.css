@@ -205,7 +205,7 @@ form {
 .uni-form-item {
 	display: flex;
 	width: 100%;
-	padding: 10upx 0;
+	padding: 1upx 0;
 }
 
 .uni-form-item .title {

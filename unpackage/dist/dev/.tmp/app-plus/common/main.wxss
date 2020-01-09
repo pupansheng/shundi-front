@@ -206,7 +206,7 @@ form {
 	display: -webkit-flex;
 	display: flex;
 	width: 100%;
-	padding: 10rpx 0;
+	padding: 1rpx 0;
 }
 .uni-form-item .title {
 	padding: 10rpx 25rpx;
@@ -1698,7 +1698,7 @@ m-input {
 	-webkit-flex-direction: column;
 	        flex-direction: column;
 	background-color: #efeff4;
-	padding: 20rpx;
+	padding: 3rpx;
 }
 .input-group {
 	background-color: #ffffff;
