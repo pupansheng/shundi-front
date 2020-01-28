@@ -142,7 +142,7 @@ export default {
 					} else {
 						console.log(res.data.message);
 						uni.showToast({
-							title: '更新失败！',
+							title: '更新失败:'+res.data.message,
 							image: '../../static/img/alert-3.png',
 							duration: 3000
 						});
@@ -151,7 +151,7 @@ export default {
 				fail: err => {
 					uni.hideLoading();
 					uni.showToast({
-						title: '更新失败！',
+						title: '更新失败:'+err,
 						image: '../../static/img/alert-3.png',
 						duration: 3000
 					});

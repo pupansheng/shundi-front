@@ -28,8 +28,24 @@
         },
 		{
 		    "path": "pages/chat/chat",
-		    "style": {
-		        "navigationBarTitleText": "信息"
+		   "style" : {
+		   	"navigationBarTitleText": "聊天",
+		   	// "enablePullDownRefresh": true,
+		   	"scrollIndicator": "none",
+		   	"app-plus": {
+		   		"softinputNavBar": "none",
+		   		"scrollIndicator": "none"
+		   	}
+		   }
+		},
+		{
+		    "path" : "pages/HM-chat/HM-chat",
+		    "style" : {
+				"navigationBarTitleText":"chat聊天室",
+		    	"app-plus":{
+		    		"softinputNavBar":"none",
+		    		"bounce":"none"
+		    	}
 		    }
 		},
 		{
@@ -47,7 +63,8 @@
 		{
 		    "path": "pages/user/detail",
 		    "style": {
-		        "navigationBarTitleText": "个人资料"
+		        "navigationBarTitleText": "个人资料",
+				"enablePullDownRefresh": true
 		    }
 		}
         ,{

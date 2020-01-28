@@ -11,9 +11,11 @@ const store = new Vuex.Store({
         forcedLogin: true,
         hasLogin: false,
         userName: "",
-		serverUrl:"http://pps1899097338.natapp1.cc",
+		//serverUrl:"http://pps1899097338.natapp1.cc",
+		serverUrl:"http://q3ejpf.natappfree.cc",
 		user: {},
-		data:{}
+		data:{},
+		linkList:[]
     },
 	updated:function(){
 			console.log('message update:'+ this.scrollTop);
@@ -31,7 +33,11 @@ const store = new Vuex.Store({
 			state.user=u;
 		},
 		updateData(state,k,v){
-			state.data[k]=u;
+			state.data[k]=v;
+		},
+		setLinkList(state,data){
+			state.linkList=data;
+			
 		}
     }
 })

@@ -2,7 +2,7 @@
   <view style="margin-top: 0rpx;">
     <cmd-page-body type="top" style="margin-top: 0rpx;">
       <cmd-transition name="fade-up" style="margin-top: 0rpx;">
-        <view>
+        <view  style="margin-top: 0rpx;">
           <cmd-cel-item title="头像" slot-right arrow>
             <cmd-avatar :src="serverUrl+'/'+user.headimage" @click="uploadHeadImage()"></cmd-avatar>
           </cmd-cel-item>
@@ -38,6 +38,7 @@
   import cmdTransition from "@/components/cmd-transition/cmd-transition.vue"
   import cmdCelItem from "@/components/cmd-cell-item/cmd-cell-item.vue"
   import cmdAvatar from "@/components/cmd-avatar/cmd-avatar.vue"
+  import http from '../../common/js/request.js';
 
   export default {
     components: {
@@ -54,13 +55,18 @@
       return {};
     },
 
-    mounted() {},
+    mounted() {
+		
+			uni.startPullDownRefresh();
+		
+	},
     
     methods:{
       /**
        * 点击触发
        * @param {Object} type 跳转页面名或者类型方式
        */
+	  ...mapMutations(['login', 'updateUser']),
       fnClick(type){
         if(type == 'modify'){
           uni.navigateTo({
@@ -156,7 +162,36 @@
 		  
 		  
 	  }
-    }
+    },
+	onLoad(option) {
+		
+	
+		
+	},
+	onPullDownRefresh() {
+			        const that=this;
+			        setTimeout(function () {
+						
+					http.get({url:'/user/getBasciInfo/'+that.user.id}).then(res=>{
+						
+						that.updateUser(res);
+							
+					},err=>{
+						
+						
+						uni.showToast({
+							icon:'none',
+							title:'获取基本信息失败'
+						})
+						
+					}
+					
+				
+					
+					)
+			        uni.stopPullDownRefresh();
+			        }, 100);
+	}
   }
 </script>
 

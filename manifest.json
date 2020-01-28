@@ -10,7 +10,8 @@
         "usingComponents" : true,
         /* 模块配置 */
         "modules" : {
-            "Payment" : {}
+            "Payment" : {},
+            "Maps" : {}
         },
         /* 应用发布信息 */
         "distribute" : {
@@ -49,6 +50,12 @@
             "sdkConfigs" : {
                 "payment" : {
                     "alipay" : {}
+                },
+                "maps" : {
+                    "amap" : {
+                        "appkey_ios" : "fef3085bf989ebe4e5fffb2c64d7ee3a",
+                        "appkey_android" : "fef3085bf989ebe4e5fffb2c64d7ee3a"
+                    }
                 }
             }
         }

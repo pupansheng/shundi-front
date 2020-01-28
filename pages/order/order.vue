@@ -8,11 +8,51 @@
 				</view>
 			</view>
 		</scroll-view>
+		<uni-drawer :visible="drawer" @close="drawer=false">
+		    <view style="margin-top: 100rpx;">
+		        <view class="title1">
+					接单人详细信息
+				</view>
+				
+				<view >
+					
+					<view>
+					  <cmd-cel-item title="头像"  slot-right >
+					    <cmd-avatar :src="serverUrl+'/'+orderPeople.headimage"></cmd-avatar>
+					  </cmd-cel-item>
+					  <cmd-cel-item title="级别" :addon="orderPeople.lervel" ></cmd-cel-item>
+					  <cmd-cel-item title="昵称" :addon="orderPeople.username" ></cmd-cel-item>
+					  <cmd-cel-item title="联系方式":addon="orderPeople.phone" ></cmd-cel-item>
+					  
+					  <view v-if="orderPeople.usertype==1">
+					  <cmd-cel-item title="姓名" :addon="orderPeople.realname" ></cmd-cel-item>
+					  <cmd-cel-item title="户籍地" :addon="orderPeople.nativeplace" ></cmd-cel-item>
+					  <cmd-cel-item title="现居地" :addon="orderPeople.nowplace" ></cmd-cel-item>
+					 </view>
+					 
+					   <view v-if="orderPeople.usertype==2">
+					 <cmd-cel-item title="公司名"   :addon="orderPeople.companyname" ></cmd-cel-item>
+					 <cmd-cel-item title="公司地址" :addon="orderPeople.companyaddress" ></cmd-cel-item>
+					 <cmd-cel-item title="公司联系人" :addon="orderPeople.companylinkname" ></cmd-cel-item>
+					 <cmd-cel-item title="公司联系电话" :addon="orderPeople.companylinkphone" ></cmd-cel-item>
+					    </view>
+						<cmd-cel-item title="与接单人商量" @click="talkTo(orderPeople)"  slot-right arrow>
+						 
+						</cmd-cel-item>
+					
+					 
+					</view>
+					
+					
+					
+				</view>
+		    </view>
+		</uni-drawer>
 		<view style="margin-top: 80rpx;width: 100%;" >
 			
 					
 					<view>
-						<view class="bg-white margin-xs padding-xs shadow radius text-content" :style="{'width':phoneStatus.windowWidth+'px'}" v-for="(item,index) in order_list"
+						<view class="bg-white margin-xs padding-xs shadow radius text-content" :style="{'width':phoneStatus.windowWidth-10+'px'}" v-for="(item,index) in order_list"
 						 :key="index">
 						 
 						
@@ -25,8 +65,8 @@
 									<view style="display: flex;flex-direction: column;">
 										
 										<!-- <view class="text-grey text-center">{{item.toAddress.substr(0,6)}}</view>	 -->								
-										<view class="text-grey" style="align-self:flex-end;">重量：    {{item.goodsweight}}</view>
-										<view class="text-grey" style="align-self:flex-end;">体积：    {{item.goodsvolume}}</view>
+										<view class="text-grey" style="align-self:flex-end;">重量：    {{item.goodsweight+'KG'}}</view>
+										<view class="text-grey" style="align-self:flex-end;">体积：    {{item.goodsvolume+'ML'}}</view>
 									</view>
 								</view>
 							</view>
@@ -35,7 +75,7 @@
 								
 							
 							<view style="display: flex;justify-content: flex-end;">
-								<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与货主商量</button>
+								<button @click.stop="seeOrderPeople(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">与货主商量</button>
 							    <button @click.stop="cancel0(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">取消</button>
 							</view>
 								
@@ -78,7 +118,7 @@
 							
 							<view v-if="searchEntity.status==5">
 								<view  style="display: flex;justify-content: flex-end;">
-									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
+									<button @click.stop="seeOrderPeople(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
 									
 								</view>
 								
@@ -111,9 +151,14 @@
 	import uniPagination from "@dcloudio/uni-ui/lib/uni-pagination/uni-pagination.vue"
 	import http from '../../common/js/request.js';
 	import uniBadge from "@dcloudio/uni-ui/lib/uni-badge/uni-badge.vue"
+	import uniDrawer from '@dcloudio/uni-ui/lib/uni-drawer/uni-drawer.vue'
+	import cmdCelItem from "@/components/cmd-cell-item/cmd-cell-item.vue"
+	import cmdAvatar from "@/components/cmd-avatar/cmd-avatar.vue"
+	import hFormAlert from '@/components/h-form-alert/h-form-alert.vue';
+	import uniPopup from "@dcloudio/uni-ui/lib/uni-popup/uni-popup.vue"
 
 	export default {
-		computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user']),
+		computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user','linkList']),
 		data() {
 			return {
 				navlist: [
@@ -132,6 +177,7 @@
 						
 				
 				],
+				drawer:false,
 				classNum:{
 					'0':'',
 					'1':'',
@@ -143,12 +189,98 @@
 				searchEntity:{
 					status:0
 				},
+				orderPeople:{},
 				status: '',	
-				phoneStatus:{}
+				phoneStatus:{},
+				flag:true
 			}
 		},
-		components:{uniPagination,uniBadge},
+		components:{uniPagination,uniBadge,uniDrawer,cmdCelItem,
+		cmdAvatar,hFormAlert,uniPopup},
 		methods: {
+			...mapMutations(['setLinkList']),
+			dateFormat(fmt, date) {
+				let ret;
+				const opt = {
+					'Y+': date.getFullYear().toString(), // 年
+					'm+': (date.getMonth() + 1).toString(), // 月
+					'd+': date.getDate().toString(), // 日
+					'H+': date.getHours().toString(), // 时
+					'M+': date.getMinutes().toString(), // 分
+					'S+': date.getSeconds().toString() // 秒
+					// 有其他格式化字符需求可以继续添加，必须转化成字符串
+				};
+				for (let k in opt) {
+					ret = new RegExp('(' + k + ')').exec(fmt);
+					if (ret) {
+						fmt = fmt.replace(ret[1], ret[1].length == 1 ? opt[k] : opt[k].padStart(ret[1].length, '0'));
+					}
+				}
+				return fmt;
+			},
+			seeOrderPeople(o){
+			const that=this;
+			that.drawer=true;
+			http.get({url:'/order/getBasicInfo/'+o.ownerid}).then(res=>{
+//				console.log(res)
+			that.orderPeople=res;
+			},err=>{
+								
+			})
+							
+							
+			},
+			talkTo(to){
+				
+				const me=this;
+				let isExists = false;
+				let linkList = me.linkList;
+				//此时时间
+				let date = new Date();
+				let time = me.dateFormat('YYYY-mm-dd HH:MM', date);
+				let mes={
+						type: 'chat',
+						title: to.phone,
+						name:to.username,
+						url:to.headimage,//头像
+						history: [],
+						message: '',
+						time: '',
+						count: null,
+						stick: false, //是否为置顶状态
+						disabled: false, //是否禁止滑动
+						type: 2 //普通用户类型消息,
+						}
+				   linkList.forEach((item,index)=>{
+					
+					if(item.title==to.phone){
+						
+						uni.navigateTo({
+							url:'../HM-chat/HM-chat?id='+index
+						})
+						isExists=true;
+					}
+					
+					
+					
+				  })
+				    
+					if(isExists)
+					    return;
+				
+					linkList.push(mes);
+					this.setLinkList(linkList);
+					let id=linkList.length-1;
+					uni.navigateTo({
+						url:'../HM-chat/HM-chat?id='+id
+					})
+					
+				
+				
+				
+				
+				
+			},
 			geikehu(o){
 				
 				const that=this;
@@ -321,7 +453,7 @@
 			goDetail(o){
 				
 				uni.navigateTo({
-					url:'../cargo/cargo/cargo?id='+o.userpointid
+					url:'../cargo/cargo/cargo?id='+o.userpointid+'&type=1'
 				})
 			},
 			getDataList(){
@@ -343,6 +475,9 @@
 							 that.order_list=res.list;
 							  that.order_list.forEach(p=>{
 								  p.goodsimage=JSON.parse(p.goodsimage)
+								  if(p.goodsimage.length>2){
+								  p.goodsimage.splice(2,1)
+								  }
 							  })
 							 that.page.pageNum=res.pageNum;
 							 that.page.pageSize=res.pageSize;
@@ -356,7 +491,7 @@
 			  	 
 				
 			},
-			getOderNum(){
+			getOderNum(oo){
 				
 				let url='/order/query/getOrderNum';
 				let data={
@@ -370,6 +505,20 @@
 				 http.get(entity).then(
 				           res => {  
 							  Object.assign(that.classNum,res)
+							  if(oo){
+								  
+								  for(var att in that.classNum){
+								  								
+								   if(that.classNum[att]!=0){
+								  	 that.currentIndex=att;
+								  	this.searchEntity.status=att;
+									that.flag=false;						  	that.getDataList();
+								    break;
+									  }
+								  								  
+								  }
+							  }
+
 				           },
 				           error => {
 				               console.log('失败');
@@ -392,15 +541,28 @@
 		onPullDownRefresh() {
 				        const that=this;
 				        setTimeout(function () {
-							that.getOderNum();
-							that.getDataList();
+							if(that.flag)
+							that.getOderNum({});
+							else{
+								that.getOderNum();
+								that.getDataList()
+							}
+						//	that.getDataList();
 				            uni.stopPullDownRefresh();
 				        }, 1000);
 		}
 		
 	}
 </script>
+<style  lang="scss">
+	
+	@import '../../common/common.scss';
+	.title1{
+		@include title
+	}
+	
 
+</style>
 <style>
 	@import url("../../static/colorui.css");
 	.cover {

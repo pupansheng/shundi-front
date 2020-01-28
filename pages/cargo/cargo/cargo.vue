@@ -12,8 +12,8 @@
 			<view class="title1">物品信息</view>
 			<view class="cargo">
 				<text>物品：{{entity.goods.name}}\n</text>
-				<text>体积：{{entity.goods.volume}}\n</text>
-				<text>重量：{{entity.goods.weight}}\n</text>
+				<text>体积：{{entity.goods.volume}}L\n</text>
+				<text>重量：{{entity.goods.weight}}kg\n</text>
 				<text>简介：\n</text>
 				<text style="border: 1px dashed  #007AFF">{{entity.goods.detail}}\n</text>
 				
@@ -50,6 +50,7 @@
 						  <cmd-cel-item title="姓名" :addon="entity.tbUser.realname" ></cmd-cel-item>
 						  <cmd-cel-item title="户籍地" :addon="entity.tbUser.nativeplace" ></cmd-cel-item>
 						  <cmd-cel-item title="现居地" :addon="entity.tbUser.nowplace" ></cmd-cel-item>
+						  <cmd-cel-item title="私聊货主" @click="talkTo(entity.tbUser)" slot-right arrow></cmd-cel-item>
 						 </view>
 						 
 						   <view v-if="user.usertype==2">
@@ -67,9 +68,9 @@
 					</view>
 			    </view>
 			</uni-drawer>
-			<view style="display: flex;justify-content: center;" v-if="entity.id!=null">
+			<view style="display: flex;justify-content: center;" v-if="entity.id!=null&&isShow2">
 				<button type="primary" plain="true"  @click="fnOrder()" v-if="isShow"><uni-icons type="plus" size="30"/>我要接这单</button>
-				<button type="primary"><uni-icons type="chat" size="30"/>私聊货主</button>
+				
 			</view>
 		</view>
 </template>
@@ -84,7 +85,7 @@ import cmdCelItem from "@/components/cmd-cell-item/cmd-cell-item.vue"
 import cmdAvatar from "@/components/cmd-avatar/cmd-avatar.vue"
 import http from '../../../common/js/request.js';
 export default {
-	computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user']),
+	computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user','linkList']),
 	components:{
 		uniCard,
 		uniSwiperDot,
@@ -141,10 +142,79 @@ export default {
 							dotsStyles: {},
 			                imageArray:[],
 							isShow:true,
+							isShow2:true,
 							drawer:false
 	}
 	},
 	methods: {
+		...mapMutations(['setLinkList']),
+		dateFormat(fmt, date) {
+			let ret;
+			const opt = {
+				'Y+': date.getFullYear().toString(), // 年
+				'm+': (date.getMonth() + 1).toString(), // 月
+				'd+': date.getDate().toString(), // 日
+				'H+': date.getHours().toString(), // 时
+				'M+': date.getMinutes().toString(), // 分
+				'S+': date.getSeconds().toString() // 秒
+				// 有其他格式化字符需求可以继续添加，必须转化成字符串
+			};
+			for (let k in opt) {
+				ret = new RegExp('(' + k + ')').exec(fmt);
+				if (ret) {
+					fmt = fmt.replace(ret[1], ret[1].length == 1 ? opt[k] : opt[k].padStart(ret[1].length, '0'));
+				}
+			}
+			return fmt;
+		},
+		talkTo(to){
+	    const me=this;		
+		let isExists = false;
+		let linkList = me.linkList;
+		//此时时间
+		let date = new Date();
+		let time = me.dateFormat('YYYY-mm-dd HH:MM', date);
+		
+		
+			let mes={
+				type: 'chat',
+				title: to.phone,
+				name:to.username,
+				url:to.headimage,//头像
+				history: [],
+				message: '',
+				time: '',
+				count: null,
+				stick: false, //是否为置顶状态
+				disabled: false, //是否禁止滑动
+				type: 2 //普通用户类型消息,
+				}
+			//震动
+			linkList.forEach((item,index)=>{
+								
+			if(item.title==to.phone){
+									
+			uni.navigateTo({
+			url:'../../HM-chat/HM-chat?id='+index
+			})
+			isExists=true;
+			}
+								
+								
+								
+			})
+			  
+			if(isExists)
+			return;
+			linkList.push(mes);
+			this.setLinkList(linkList);
+			let id=linkList.length-1;
+			uni.navigateTo({
+				url:'../../HM-chat/HM-chat?id='+id
+			})
+			
+		
+		},
 		seeOwner(){
 			
 			this.drawer=!this.drawer
@@ -283,12 +353,17 @@ export default {
 	       const that=this
 		   that.isShow=true;
 		   let carId=option.id;
+		   let type=option.type;
 		   let submit={};
 		   submit.url='/user/userPoint/findOne/'+carId;
 		   submit.data={};
 		   http.post(submit).then(res=>{
 			   
 			   that.entity=res
+			   if(type){
+				   that.isShow2=false;
+			   }
+			   if(!type)
 			   if(res.status==0){
 				   
 			   	uni.showToast({

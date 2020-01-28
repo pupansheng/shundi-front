@@ -39,7 +39,7 @@
 			<view v-show="step[1]">
 				<scroll-view :scroll-top="wH" scroll-y="true" class="scroll-Y" v-if="TabCur==0">
 					<view class="uni-form-item uni-column">
-						<view class="title" >货物名称</view>
+						<view class="title" >货物名称:</view>
 						<input class="uni-input" placeholder="货物名称" v-model="userPoint.goods.name" />
 					</view>
 				<!-- 	<view class="uni-form-item uni-column">
@@ -51,21 +51,25 @@
 						<input class="uni-input" placeholder="货物质量" v-model="userPoint.goods.weight" />
 					</view>
 					 -->
-					<view style="display: flex;align-items: center;justify-content: space-around;">
+					<view style="display: flex;align-items: center;justify-content: space-between;margin-top: 15rpx;">
 						
-						<view>&nbsp;</view><view  class="title">体积:</view><uni-number-box step="0.1" @change="bindChange1"></uni-number-box>升&nbsp;<view style="border:solid #007AFF;width: 3rpx;height: 9rpx;"></view>
-						<view  class="title">重量:</view><uni-number-box step="0.1" @change="bindChange2"></uni-number-box>kg
+						<view  class="title" style="margin-left: 25rpx;">体积:</view>
+						<uni-number-box step="0.1" @change="bindChange1"></uni-number-box>升
+			
 					</view>
-					
+					<view style="display: flex;align-items: center;justify-content:  space-between;margin-top: 15rpx;margin-bottom: 10rpx;">
+							<view class="title" style="margin-left: 25rpx;" >重量:</view>
+						    <uni-number-box step="0.1" @change="bindChange2"></uni-number-box>kg
+					</view>
                      
                        <view class="uni-form-item uni-column">
-                       <view class="title" >货物图片</view>
-                        <QSPics :name="name" variableName="pics"  :exists="false" title="上传图片"  :typeName="'cargoImage'" @upload="uploadImage" v-model="cargoImage"></QSPics>
+                       <view class="title" >货物图片:</view>
+                        <QSPics :name="name" variableName="pics"  :exists="false"   :typeName="'cargoImage'" @upload="uploadImage" v-model="cargoImage"></QSPics>
                    	
                        </view>
 					<view class="uni-form-item uni-column">
-						<view class="title" >货物描述</view>
-						<textarea class="uni-input" style="height: 100rpx;" placeholder="货物描述" v-model="userPoint.goods.detail" />
+						<view class="title" >货物描述:</view>
+						<textarea class="uni-input" style="height: 100rpx;width: 100%;" placeholder="货物描述" v-model="userPoint.goods.detail" />
 					</view>
 					<hr/>
 					<!-- <view class="uni-form-item uni-column">
@@ -76,19 +80,22 @@
 						<view class="title" style="color: red;">*收货人电话</view>
 						<input class="uni-input" placeholder="收货人电话" v-model="userPoint.consignee.phone" />
 					</view> -->
-					<view style="display: flex;align-items: center;">
-						<view>&nbsp;&nbsp;</view><view  class="title"><uni-icons type="person" size="20" />收货人</view><input class="uni-input" placeholder="收货人" v-model="userPoint.consignee.name" />
-						<view  class="title"><uni-icons type="phone" size="20" />联系电话</view><input class="uni-input" placeholder="收货人电话" v-model="userPoint.consignee.phone" />
+					<view  style="display: flex;align-items: center;justify-content: space-between;margin-top: 15rpx;">
+						<view>&nbsp;&nbsp;</view><view  class="title"><uni-icons type="person" size="20" style="margin-left: 20rpx;"/>收货人员:&nbsp;</view><input class="uni-input" placeholder="收货人" v-model="userPoint.consignee.name" />
+					</view>
+					<view style="display: flex;align-items: center;justify-content: space-between;margin-top: 15rpx;">
+						
+						<view  class="title"><uni-icons type="phone" size="20" style="margin-left: 20rpx;"/>联系电话:</view><input class="uni-input" placeholder="收货人电话" v-model="userPoint.consignee.phone" />
 					</view>
 					<view class="uni-form-item uni-column" style="margin-top: 1rpx;padding-top: 2rpx;">
-						<view class="title"><uni-icons type="location" size="20" />放货地址</view>
+						<view class="title"><uni-icons type="location" size="20" />放货地址:</view>
 						<input class="uni-input" placeholder="收货地址" v-model="userPoint.address" @click="searAddress(1)"/>
 						<!-- <ul>
 							<li v-for="(v,k) in addressList1" @click="addressSelect(v,k,1)">{{v.name}}</li>
 						</ul> -->						
 					</view>
 					<view class="uni-form-item uni-column">
-						<view class="title"><uni-icons type="location" size="20" />收货地址</view>
+						<view class="title"><uni-icons type="location" size="20" />收货地址:</view>
 						<input class="uni-input" placeholder="收货地址" v-model="userPoint.toaddress"  @click="searAddress(2)" />
 						<!-- <ul>
 							<li v-for="(v,k) in addressList2" @click="addressSelect(v,k,2)">{{v.name}}</li>
@@ -123,14 +130,14 @@
 				<scroll-view :scroll-top="wH" scroll-y="true" class="scroll-Y" v-if="TabCur==0">
 					<view >
 						
-						<p>车型：--------------------------------------------{{ carList[TabCur].name }}</p>
+						<!-- <p>车型：--------------------------------------------{{ carList[TabCur].name }}</p>
 						<p>起步价:-------------------------------------------${{ carList[TabCur].startPrice }}元</p>
 						<p>均价价:-------------------------------------------${{ carList[TabCur].averagePrice }}元</p>
 						<p>起步距离:-----------------------------------------{{ carList[TabCur].startDistance }}米</p>
 						<p>预计距离:-----------------------------------------{{ carList[TabCur].startDistance }}米</p>
 						<p>预计运时:-----------------------------------------{{Math.round(aroundTime/60) }}分</p>
 						<p>预计费用:-----------------------------------------${{ userPoint.money }}元</p>
-						
+						 -->
 						
 					</view>
 				</scroll-view>
@@ -165,6 +172,8 @@ import uniDrawer from '@dcloudio/uni-ui/lib/uni-drawer/uni-drawer.vue'
 import QSPics from '@/components/QS-inputs-split/elements/QS-pics/index.vue';
 import uniIcons from "@dcloudio/uni-ui/lib/uni-icons/uni-icons.vue"
 import uniNumberBox from "@dcloudio/uni-ui/lib/uni-number-box/uni-number-box.vue"
+import http from '../../common/js/request.js';
+
 
 export default {
 	computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user']),
@@ -478,7 +487,7 @@ export default {
 			this.TabCur = current;
 		},
 		toLogin() {
-			console.log('是否强制登录？' + this.forcedLogin);
+			console.log('是否强制登录？------' + this.forcedLogin);
 			if (!this.forcedLogin) {
 				uni.showModal({
 					title: '未登录',
@@ -601,7 +610,7 @@ export default {
 			var that=this;
 			uni.showModal({
 			    title: '提示',
-			    content: '确认提交订单?提交后将可能被顺路者带走',
+			    content: '确认提交订单?提交后将可能被顺路者申请交易',
 			    success: function (res) {
 			        if (res.confirm) {
 						uni.showLoading({
@@ -738,6 +747,9 @@ export default {
 		}
 	},
 	onLoad() {
+
+		
+		
 		const Sys = uni.getSystemInfoSync();
 
 		const wH = Sys.windowHeight;
@@ -756,26 +768,55 @@ export default {
 							//自定义请求头信息
 						},
 						success: res => {
-							console.log(res)
+						     console.log(res)  
 							if (res.data.status==true) {
 								console.log(res.data);
 								var seser = JSON.parse(res.data.data);
 								this.login(seser.username);
 								that.updateUser(seser);
+								
+								let username= that.user.username;
+								console.log("tim开始登陆--------------------有token分支：username="+username)
+								
+								
+								that.$conn.open({
+									apiUrl: that.$im.config.apiURL,
+									user: seser.phone,
+									pwd: seser.phone,
+									grant_type: 'password',
+									appKey: that.$im.config.appkey
+								});
+							
+							
+							
+								
+								
+								
+								
+								
+								
 							} else {
-								uni.showToast({
+								if(res.statusCode==200){				
+								 uni.showToast({
 									icon: 'none',
 									title: '登陆已过期，请重新登录'
-								});
+								 });
+								}else{
+									uni.showToast({
+									icon: 'none',
+									title: '网络错误：网络连接失败'
+									});
+								}
 								setTimeout(function(){
 									that.toLogin();
 								},1000)
+								
 							}
 						},
 						fail: err => {
 							uni.showToast({
 								icon: 'none',
-								title: '自动登录失败'
+								title: '自动登录失败：网络超时'
 							});
                             setTimeout(function(){
 								that.toLogin();
@@ -806,6 +847,24 @@ export default {
 					
 				},1000)
 			}
+			
+		}else{
+		   const that=this;
+		   console.log("tim开始登陆 else 已登录分支--------------------")
+		   let seser= this.user
+		   that.$conn.open({
+		 	apiUrl: that.$im.config.apiURL,
+		 	user: seser.phone,
+		 	pwd: seser.phone,
+		 	grant_type: 'password',
+		 	appKey: that.$im.config.appkey
+		   });
+		 							
+		  
+			
+			
+			
+			
 		}
 	},
 	onReady() {

@@ -134,10 +134,18 @@ export default {
 					} else {
 						console.log(res.data.message)
 						uni.showToast({
-							title: '更新失败！',
+							title: '更新失败:'+res.data.message,
 							image: '../../static/img/alert-3.png',
 							duration: 3000
 						});
+						setTimeout(function(){
+							
+							uni.navigateBack({
+								
+							})
+							
+						},1000)
+						
 					}
 				},
 				fail: err => {
@@ -147,6 +155,13 @@ export default {
 						image: '../../static/img/alert-3.png',
 						duration: 3000
 					});
+					setTimeout(function(){
+						
+						uni.navigateBack({
+							
+						})
+						
+					},1000)
 				}
 			});
 		}

@@ -21,7 +21,7 @@
 					  <cmd-cel-item title="头像"  slot-right >
 					    <cmd-avatar :src="serverUrl+'/'+orderPeople.headimage"></cmd-avatar>
 					  </cmd-cel-item>
-					  <cmd-cel-item title="级别" :addon="orderPeople.level" ></cmd-cel-item>
+					  <cmd-cel-item title="级别" :addon="orderPeople.lervel" ></cmd-cel-item>
 					  <cmd-cel-item title="昵称" :addon="orderPeople.username" ></cmd-cel-item>
 					  <cmd-cel-item title="联系方式":addon="orderPeople.phone" ></cmd-cel-item>
 					  
@@ -37,7 +37,7 @@
 					 <cmd-cel-item title="公司联系人" :addon="orderPeople.companylinkname" ></cmd-cel-item>
 					 <cmd-cel-item title="公司联系电话" :addon="orderPeople.companylinkphone" ></cmd-cel-item>
 					    </view>
-						<cmd-cel-item title="与接单人商量" @click="talkTo()"  slot-right arrow>
+						<cmd-cel-item title="与接单人商量" @click="talkTo(orderPeople)"  slot-right arrow>
 						 
 						</cmd-cel-item>
 					
@@ -54,7 +54,7 @@
 			
 					
 					<view>
-						<view class="bg-white margin-xs padding-xs shadow radius text-content" :style="{'width':phoneStatus.windowWidth+'px'}"  v-for="(item,index) in order_list"
+						<view class="bg-white margin-xs padding-xs shadow radius text-content" :style="{'width':phoneStatus.windowWidth-10+'px'}"  v-for="(item,index) in order_list"
 						 :key="index">
 						 
 						
@@ -67,8 +67,8 @@
 									<view style="display: flex;flex-direction: column;">
 										
 										<!-- <view class="text-grey text-center">{{item.toAddress.substr(0,6)}}</view>	 -->								
-										<view class="text-grey" style="align-self:flex-end;">重量：    {{item.goods.weight}}</view>
-										<view class="text-grey" style="align-self:flex-end;">体积：    {{item.goods.volume}}</view>
+										<view class="text-grey" style="align-self:flex-end;">重量：    {{item.goods.weight+'KG'}}</view>
+										<view class="text-grey" style="align-self:flex-end;">体积：    {{item.goods.volume+'ML'}}</view>
 									</view>
 								</view>
 							</view>
@@ -96,7 +96,7 @@
 								</view>
 								
 								<view v-if="searchEntity.status==2">
-									<button @click.stop="kefu" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
+									<button @click.stop="seeOrderPeople(item)" class="round lines-grey cu-btn shadow mid margin-right-sm">与接单人交谈</button>
 									
 								</view>
 								
@@ -166,7 +166,7 @@
 	import uniPopup from "@dcloudio/uni-ui/lib/uni-popup/uni-popup.vue"
 
 	export default {
-		computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user']),
+		computed: mapState(['forcedLogin', 'hasLogin', 'userName', 'serverUrl', 'user','linkList']),
 		data() {
 			return {
 				navlist: [
@@ -203,13 +203,132 @@
 				status: '',	
 				phoneStatus:{},
 				orderPeople:{},
-				drawer:false
+				drawer:false,
+				flag:true
 			}
 		},
 		components:{uniPagination,uniBadge,uniDrawer,cmdCelItem,
 		cmdAvatar,hFormAlert,uniPopup},
 		methods: {
+			...mapMutations(['setLinkList']),
+			dateFormat(fmt, date) {
+				let ret;
+				const opt = {
+					'Y+': date.getFullYear().toString(), // 年
+					'm+': (date.getMonth() + 1).toString(), // 月
+					'd+': date.getDate().toString(), // 日
+					'H+': date.getHours().toString(), // 时
+					'M+': date.getMinutes().toString(), // 分
+					'S+': date.getSeconds().toString() // 秒
+					// 有其他格式化字符需求可以继续添加，必须转化成字符串
+				};
+				for (let k in opt) {
+					ret = new RegExp('(' + k + ')').exec(fmt);
+					if (ret) {
+						fmt = fmt.replace(ret[1], ret[1].length == 1 ? opt[k] : opt[k].padStart(ret[1].length, '0'));
+					}
+				}
+				return fmt;
+			},
 			pay(o){
+				
+				
+				const that=this;
+				let submit={};
+				submit.url='/pay/getOrder';
+				submit.data=o;
+				http.postWithNoStatus(submit).then(res1=>{
+				
+				
+				/* //模拟支付
+				uni.showLoading({
+					title:'支付中..(模拟支付)',
+				})
+				let orderId res.data.message;
+				let submit2={
+					url:'/pay/success',
+					data:{orderId:orderId}
+				}
+				http.post(submit2).then(res=>{
+					
+				uni.showToast({
+					icon:'success',
+					title:'支付成功'
+				})
+				uni.hideLoading();
+				that.getPackageNum();
+				that.getDataList()		
+				
+				},err=>{
+					
+					uni.showToast({
+						icon:'none',
+						title:'支付失败'
+					})
+					uni.hideLoading();
+					
+				}) */
+				
+					uni.requestPayment({
+					    provider: 'alipay',
+					    orderInfo: res1.data.data, //微信、支付宝订单数据
+					    success: function (res) {
+							
+					        console.log('success:' + JSON.stringify(res));
+							
+							
+							
+							
+					    },
+					    fail: function (err) {
+							
+					         console.log('fail:' + JSON.stringify(err));
+							 let orderId =res1.data.message;
+							
+							let submit2={
+								url:'/pay/success',
+								data:{orderId:orderId}
+							}
+							
+							http.get(submit2).then(res=>{
+								
+							uni.showToast({
+								icon:'success',
+								title:'支付成功'
+							})
+							
+							that.getPackageNum();
+							that.getDataList()	;
+									
+							},err=>{
+								
+								uni.showToast({
+									icon:'none',
+									title:'支付失败'
+								})
+								
+							})
+							 
+							
+							
+					    }
+					});
+					
+					
+					
+					
+					
+				},error=>{
+					
+											
+					
+				})
+				
+				
+				
+				
+				
+				
 				
 				
 			},
@@ -275,11 +394,53 @@
 				
 				
 			},
-			talkTo(){
+			talkTo(to){
+			const me=this;		
+			let isExists = false;
+			let linkList = me.linkList;
+			//此时时间
+			let date = new Date();
+			let time = me.dateFormat('YYYY-mm-dd HH:MM', date);
+			
+			
+				let mes={
+					type: 'chat',
+					title: to.phone,
+					name:to.username,
+					url:to.headimage,//头像
+					history: [],
+					message: '',
+					time: '',
+					count: null,
+					stick: false, //是否为置顶状态
+					disabled: false, //是否禁止滑动
+					type: 2 //普通用户类型消息,
+					}
+				//震动
+				linkList.forEach((item,index)=>{
+									
+				if(item.title==to.phone){
+										
+				uni.navigateTo({
+				url:'../HM-chat/HM-chat?id='+index
+				})
+				isExists=true;
+				}
+									
+									
+									
+				})
+				  
+				if(isExists)
+				return;
+				linkList.push(mes);
+				this.setLinkList(linkList);
+				let id=linkList.length-1;
+				uni.navigateTo({
+					url:'../HM-chat/HM-chat?id='+id
+				})
 				
-				console.log("jiaotan")
-				
-				
+			
 			},
 			seeOrderPeople(o){
 				const that=this;
@@ -428,7 +589,7 @@
 						    submit.data=o; 
 						   	http.post(submit).then(res=>{				
 						   	that.getPackageNum();
-						   	that.getDataList()						
+						  // 	that.getDataList()						
 						   	},err=>{
 						   						
 						   						
@@ -473,7 +634,7 @@
 			goDetail(o){
 				
 				uni.navigateTo({
-					url:'../cargo/cargo/cargo?id='+o.id
+					url:'../cargo/cargo/cargo?id='+o.id+'&type=1'
 				})
 			},
 			getDataList(){
@@ -491,17 +652,16 @@
 				 const that=this;
 			     http.get(entity).then(
 			               res => {
-							
 							  that.page.pageTotal=res.pageCount;
 							  that.order_list=[];
 							  res.list.forEach(p=>{
 								  
 								  p.cargoImage=JSON.parse(p.cargoImage);
+								  if(p.cargoImage.length>2){
+									  p.cargoImage.splice(2,1)
+								  }
 								  that.order_list.push(p)
-								  
 							  });
-			                    
-							  
 			               },
 			               error => {
 			                   console.log('失败');
@@ -510,7 +670,7 @@
 			  	 
 				
 			},
-			getPackageNum(){
+			getPackageNum(oo){
 				 let url='/user/userPoint/query/getPackageNum';
 				 let data={
 						userId:this.user.id
@@ -525,6 +685,28 @@
 							 res['0']=res['1'];
 							 res['1']=t;
 							 Object.assign(that.classNum,res)
+							 if(oo){						  
+							 	for(var att in that.classNum){					  								
+							 	if(that.classNum[att]!=0){
+									if(att=='0'){
+							 		
+									this.searchEntity.status=1;
+									}
+									else if(att=='1'){
+								
+									this.searchEntity.status=0;
+									}
+									else
+									this.searchEntity.status=att
+									
+							 		that.currentIndex=att;
+							 		that.getDataList();
+									that.flag=false;
+							 		break;
+							 	   }
+							 								  								  
+							 	}
+							 }
 							 
 							  
 				           },
@@ -557,9 +739,14 @@
 		onPullDownRefresh() {
 		        const that=this;
 		        setTimeout(function () {
+					if(that.flag)
+					that.getPackageNum({});
+					else{
+						that.getPackageNum();
+						that.getDataList()
+					}
 					
-					that.getPackageNum();
-					that.getDataList()
+					//that.getDataList()
 					/* that.getPackageNum();
 					that.getDataList() */
 					

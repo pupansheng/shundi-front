@@ -137,13 +137,31 @@ export default {
 		},
 		fnRegister() {
 			if (this.status) {
-				console.log(JSON.stringify(this.mobile));
-
-				var user = {};
-				user.username = this.mobile.phone;
-				user.password=this.mobile.code;
-				user.phone = this.mobile.phone;
-
+				        console.log(JSON.stringify(this.mobile));
+						var user = {};
+						user.username = this.mobile.phone;
+						user.password=this.mobile.code;
+						user.phone = this.mobile.phone;
+						const that=this;
+						
+						http.post({url:'/user/register/' + that.mobile.code,data:user}).then(res=>{
+								   
+								that.$helper.toast('none', '注册成功！', 2000, false, 'bottom');
+								setTimeout(function(){
+									
+									that.gotoLogin();
+									
+								},1000)
+								
+								
+						       },err=>{
+						     	uni.showToast({
+							     icon: 'none',
+							     title: '注册失败:'+err
+						      });	
+						})
+						
+				/* 
 				uni.request({
 					url: this.serverUrl + '/user/register/' + this.mobile.code, //仅为示例，并非真实接口地址。
 					method: 'POST',
@@ -154,15 +172,13 @@ export default {
 					},
 					success: res => {
 						if(res.data.status){
-						uni.showToast({
-							icon: 'success',
-							title: '成功'
-						});
-						this.gotoLogin();
+						
+					
+						
 						}else{
 							uni.showToast({
 								icon: 'none',
-								title: '注册失败'
+								title: '注册失败:'+res.data.message
 							});	
 					    }
 						
@@ -173,7 +189,7 @@ export default {
 							title: '失败'
 						});
 					}
-				});
+				}); */
 			} else {
 				
 				console.log(JSON.stringify(this.account));

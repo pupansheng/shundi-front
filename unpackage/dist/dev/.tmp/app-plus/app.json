@@ -6,6 +6,7 @@
     "pages/pwd/modify",
     "pages/user/user",
     "pages/chat/chat",
+    "pages/HM-chat/HM-chat",
     "pages/user/info",
     "pages/user/audit",
     "pages/user/detail",

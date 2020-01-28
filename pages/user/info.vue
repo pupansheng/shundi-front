@@ -5,6 +5,7 @@
 		<view v-if="entity.usertype == ''"><text style="color: red;align-content: center;">请先选择注册用户类型！</text></view>
 
 		<view v-if="entity.usertype == 1">
+			<QSInput :name="name" titleColor="#f1505c" variableName="input" required layout="column" title="qq邮箱" v-model="entity.bk1"></QSInput>
 			<QSInput :name="name" titleColor="#f1505c" variableName="input" required layout="column" title="真实姓名" v-model="entity.realname"></QSInput>
 			<QSInput :name="name" titleColor="#f1505c" variableName="input" required layout="column" title="户籍" v-model="entity.nativeplace"></QSInput>
 			<QSInput :name="name" titleColor="#f1505c" variableName="input" required layout="column" title="现居地址" v-model="entity.nowplace"></QSInput>

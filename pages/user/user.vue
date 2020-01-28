@@ -38,7 +38,7 @@
 				    <uni-list-item title="禁用状态" :disabled="true" :show-badge="true" badge-text="12"></uni-list-item>
 				</uni-list> -->
 				
-				<button v-if="hasLogin" type="default" @tap="bindLogout">退出登录</button>
+				<button v-if="hasLogin" type="primary" @tap="bindLogout" :style="{'position':'absolute','top':systemInfo.windowHeight-97+'px','width':'100%'}" >退出登录</button>
 			</view>
 			
 		</view>
@@ -64,6 +64,35 @@ export default {
 	},
 	computed: {
 		...mapState(['hasLogin', 'forcedLogin','serverUrl','user'])
+	},
+	data(){
+		
+		return{
+			
+			systemInfo:{}
+		}
+		
+		
+		
+	},
+	onLoad() {
+		
+		const that=this;
+		uni.getSystemInfo({
+		    success: function (res) {
+				that.systemInfo=res;
+		        console.log(res.model);
+		        console.log(res.pixelRatio);
+		        console.log(res.windowWidth);
+		        console.log(res.windowHeight);
+		        console.log(res.language);
+		        console.log(res.version);
+		        console.log(res.platform);
+		    }
+		});
+		
+		
+		
 	},
 	methods: {
 		
@@ -93,7 +122,12 @@ export default {
 			 */
 			var value = uni.getStorageSync('token');
 			var that=this;
-		
+		  
+		  //退出im
+		    this.$im.conn.close();
+		  
+		  
+		  
 		  uni.request({
 			url: that.serverUrl + '/user/loginOut/' + value, //仅为示例，并非真实接口地址。
 			method: 'POST',
